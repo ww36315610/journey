@@ -32,6 +32,7 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
+      // 发请求
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
@@ -46,8 +47,9 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
+      // 发请求
       getInfo(state.token).then(response => {
-        const { data } = response
+        const { data } = response  // 解构出data
 
         if (!data) {
           return reject('Verification failed, please Login again.')
@@ -55,8 +57,8 @@ const actions = {
 
         const { name, avatar } = data
 
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_NAME', name)   // 在state中保存用户的name
+        commit('SET_AVATAR', avatar) // 在state中保存用户的avatar
         resolve(data)
       }).catch(error => {
         reject(error)

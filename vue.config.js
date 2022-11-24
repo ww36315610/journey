@@ -27,16 +27,18 @@ module.exports = {
   publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'static',
-  lintOnSave: process.env.NODE_ENV === 'development',
-  productionSourceMap: false,
+  lintOnSave: process.env.NODE_ENV === 'development',  //开发构建时禁用eslint-loader
+  productionSourceMap: false,  //不需要生产环境的source map,以加速生产环境构建
+  // 解决跨域问题
   devServer: {
-    port: port,
-    open: true,
-    overlay: {
+    port: port,  //指定监听请求的端口号 
+    open: true,  //在服务器已经启动后打开默认浏览器
+    overlay: { //让浏览器overlay同时显示警告和错误
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    //before:在其他所有的中间件之前执行自定义的中间件。（拦截axios的请求，返回自定义的请求数据）
+    before: require('./mock/mock-server.js')  // mock-server.js其实就是封装了app.get()类型的函数
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

@@ -6,9 +6,23 @@ const Mock = require('mockjs')
 
 const mockDir = path.join(process.cwd(), 'mock')
 
+// for mock server
+// 初始化路由
+const responseFake = (url, type, respond) => {
+  return {
+    url: new RegExp(`${process.env.VUE_APP_BASE_API}${url}`),
+    type: type || 'get',
+    response(req, res) {
+      console.log('request invoke:' + req.path)
+      res.json(Mock.mock(respond instanceof Function ? respond(req, res) : respond))
+    }
+  }
+}
+
 function registerRoutes(app) {
   let mockLastIndex
   const { mocks } = require('./index.js')
+  // 循环遍历自定义的api路由
   const mocksForServer = mocks.map(route => {
     return responseFake(route.url, route.type, route.response)
   })
@@ -16,6 +30,7 @@ function registerRoutes(app) {
     app[mock.type](mock.url, mock.response)
     mockLastIndex = app._router.stack.length
   }
+
   const mockRoutesLength = Object.keys(mocksForServer).length
   return {
     mockRoutesLength: mockRoutesLength,
@@ -31,18 +46,10 @@ function unregisterRoutes() {
   })
 }
 
-// for mock server
-const responseFake = (url, type, respond) => {
-  return {
-    url: new RegExp(`${process.env.VUE_APP_BASE_API}${url}`),
-    type: type || 'get',
-    response(req, res) {
-      console.log('request invoke:' + req.path)
-      res.json(Mock.mock(respond instanceof Function ? respond(req, res) : respond))
-    }
-  }
-}
 
+
+
+// 导出一个箭头函数
 module.exports = app => {
   // parse app.body
   // https://expressjs.com/en/4x/api.html#req.body
@@ -50,12 +57,12 @@ module.exports = app => {
   app.use(bodyParser.urlencoded({
     extended: true
   }))
-
   const mockRoutes = registerRoutes(app)
+
   var mockRoutesLength = mockRoutes.mockRoutesLength
   var mockStartIndex = mockRoutes.mockStartIndex
 
-  // watch files, hot reload mock server
+  // watch files, hot reload mock server  通过 chokidar 来观察 mock 文件夹内容的变化
   chokidar.watch(mockDir, {
     ignored: /mock-server/,
     ignoreInitial: true
