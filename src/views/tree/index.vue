@@ -1,78 +1,119 @@
 <template>
   <div class="app-container">
-    <el-input v-model="filterText" placeholder="Filter keyword" style="margin-bottom:30px;" />
-
     <el-tree
-      ref="tree2"
-      :data="data2"
-      :props="defaultProps"
-      :filter-node-method="filterNode"
-      class="filter-tree"
+      :data="data"
+      show-checkbox
+      node-key="id"
       default-expand-all
-    />
-
+      :expand-on-click-node="false"
+      check-strictly
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button type="text" size="mini" @click="() => edit(data)">
+            Edit
+          </el-button>
+          <el-button type="text" size="mini" @click="() => append(data)">
+            Append
+          </el-button>
+          <el-button type="text" size="mini" @click="() => remove(node, data)">
+            Delete
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
   </div>
 </template>
 
 <script>
-export default {
+let id = 1000;
 
+export default {
   data() {
-    return {
-      filterText: '',
-      data2: [{
+    const data = [
+      {
         id: 1,
-        label: 'Level one 1',
-        children: [{
-          id: 4,
-          label: 'Level two 1-1',
-          children: [{
-            id: 9,
-            label: 'Level three 1-1-1'
-          }, {
-            id: 10,
-            label: 'Level three 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: 'Level one 2',
-        children: [{
-          id: 5,
-          label: 'Level two 2-1'
-        }, {
-          id: 6,
-          label: 'Level two 2-2'
-        }]
-      }, {
-        id: 3,
-        label: 'Level one 3',
-        children: [{
-          id: 7,
-          label: 'Level two 3-1'
-        }, {
-          id: 8,
-          label: 'Level two 3-2'
-        }]
-      }],
-      defaultProps: {
-        children: 'children',
-        label: 'label'
+        label: "所有功能",
+        children:[
+            {
+                id:2,
+                label:"人员管理",
+                children:[
+                    {
+                        id:4,
+                        label:"添加人员信息"
+                    },
+                    {
+                        id:5,
+                        label:"编辑人员信息"
+                    },
+                    {
+                        id:6,
+                        label:"删除人员信息"
+                    },
+                    {
+                        id:7,
+                        label:"筛选人员信息"
+                    }
+                ]
+            },
+            {
+                id:3,
+                label:"部门管理",
+                children:[
+                    {
+                        id:8,
+                        label:"权限管理"
+                    },
+                    {
+                        id:9,
+                        label:"角色管理"
+                    },
+                    {
+                        id:10,
+                        label:"菜单管理"
+                    }
+                ]
+            }
+        ]
       }
-    }
-  },
-  watch: {
-    filterText(val) {
-      this.$refs.tree2.filter(val)
-    }
+    ];
+
+    return {
+      data: JSON.parse(JSON.stringify(data)),
+    };
   },
 
   methods: {
-    filterNode(value, data) {
-      if (!value) return true
-      return data.label.indexOf(value) !== -1
+    edit(data){
+      alert('功能开发中')
+      // data.label = "edit test"
+    },
+    append(data) {
+      const newChild = { id: id++, label: "testtest", children: [] };
+      if (!data.children) {
+        this.$set(data, "children", []);
+      }
+      data.children.push(newChild);
+    },
+    remove(node, data) {
+      const parent = node.parent;
+      const children = parent.data.children || parent.data;
+      const index = children.findIndex((d) => d.id === data.id);
+      children.splice(index, 1);
     }
-  }
-}
+  },
+};
 </script>
 
+<style>
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  padding-right: 8px;
+}
+</style>

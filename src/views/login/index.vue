@@ -1,54 +1,60 @@
 <template>
-  <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+  <div class="login-wrap">
+    <div class="login-container">
+      <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+        <div class="title-container">
+          <h3 class="title">Login Form</h3>
+        </div>
 
-      <div class="title-container">
-        <h3 class="title">Login Form</h3>
-      </div>
+        <el-form-item prop="username">
+          <span class="svg-container">
+            <svg-icon icon-class="user" />
+          </span>
+          <el-input
+            ref="username"
+            v-model="loginForm.username"
+            placeholder="Username"
+            name="username"
+            type="text"
+            tabindex="1"
+            auto-complete="on"
+          />
+        </el-form-item>
 
-      <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
-        />
-      </el-form-item>
+        <el-form-item prop="password">
+          <span class="svg-container">
+            <svg-icon icon-class="password" />
+          </span>
+          <el-input
+            :key="passwordType"
+            ref="password"
+            v-model="loginForm.password"
+            :type="passwordType"
+            placeholder="Password"
+            name="password"
+            tabindex="2"
+            auto-complete="on"
+            @keyup.enter.native="handleLogin"
+          />
+          <span class="show-pwd" @click="showPwd">
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          </span>
+        </el-form-item>
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="Password"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
-        />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
-      </el-form-item>
+        <el-row style="text-align: center">
+          <el-button :loading="loading" type="primary" style="width:30%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+          <el-button type="primary" style="width:30%;margin-bottom:30px;">Register</el-button>
+        </el-row>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+        <el-link>Forget Password?</el-link>
 
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
-      </div>
+        <!-- <div class="tips">
+          <span style="margin-right:20px;">username: admin</span>
+          <span> password: any</span>
+        </div> -->
 
-    </el-form>
+      </el-form>
+  </div>
   </div>
 </template>
 
@@ -58,15 +64,17 @@ import { validUsername } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
+    // username的自定义校验函数
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
+      if (!validUsername(value)) {  // 用户键入的username在不在['admin', 'editor']里
         callback(new Error('Please enter the correct user name'))
       } else {
         callback()
       }
     }
+    // password的自定义校验函数
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
+      if (value.length < 6) { // 用户键入的password长度需要不小于6位
         callback(new Error('The password can not be less than 6 digits'))
       } else {
         callback()
@@ -77,6 +85,7 @@ export default {
         username: 'admin',
         password: '111111'
       },
+      // 校验rules
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
@@ -106,9 +115,11 @@ export default {
       })
     },
     handleLogin() {
+      // 前端进行表单验证
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          // 向后端发送请求（这里暂先用mock）
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
@@ -174,13 +185,25 @@ $cursor: #fff;
 
 <style lang="scss" scoped>
 $bg:#2d3a4b;
+// $bg:#fff;
 $dark_gray:#889aa4;
 $light_gray:#eee;
+
+
+.login-wrap {
+  		box-sizing: border-box;
+  		width: 100%;
+  		height: 100%;
+  		padding-top: 10%;
+      background-color: $bg;
+  		// background-position: center right;
+  		// background-size: 100%;
+}
 
 .login-container {
   min-height: 100%;
   width: 100%;
-  background-color: $bg;
+
   overflow: hidden;
 
   .login-form {
